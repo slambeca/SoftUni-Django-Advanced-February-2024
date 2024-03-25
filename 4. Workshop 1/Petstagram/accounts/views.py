@@ -1,10 +1,10 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import views as auth_views, forms as auth_forms, login, logout
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views import generic as views
 
 from Petstagram.accounts.forms import PetstagramUserCreationForm
-from Petstagram.accounts.models import PetstagramUser
+from Petstagram.accounts.models import PetstagramUser, Profile
 from Petstagram.pets.models import Pet
 
 
@@ -43,21 +43,43 @@ def signout_user(request):
     return redirect("index")
 
 
-def details_profile(request, pk):
-    context = {
-        "pet_photo": Pet.objects.get(pk=pk),
-    }
-
-    return render(request, "accounts/details_profile.html", context)
+# def details_profile(request, pk):
+#     context = {}
+#
+#     return render(request, "accounts/details_profile.html", context)
 
 
-def edit_profile(request, pk):
-    context = {}
+class ProfileDetailsView(views.DetailView):
+    queryset = (Profile.objects.
+                prefetch_related("user")
+                .all())
+    template_name = "accounts/details_profile.html"
 
-    return render(request, "accounts/edit_profile.html", context)
+
+# def edit_profile(request, pk):
+#     context = {}
+#
+#     return render(request, "accounts/edit_profile.html", context)
 
 
-def delete_profile(request, pk):
-    context = {}
+class ProfileUpdateView(views.UpdateView):
+    queryset = Profile.objects.all()
+    template_name = "accounts/edit_profile.html"
+    fields = ("first_name", "last_name", "date_of_birth", "profile_picture",)
 
-    return render(request, "accounts/delete_profile.html", context)
+    def get_success_url(self):
+        return reverse("details profile", kwargs={
+            "pk": self.object.pk,
+        })
+
+
+# def delete_profile(request, pk):
+#     context = {}
+#
+#     return render(request, "accounts/delete_profile.html", context)
+
+
+class ProfileDeleteView(views.DeleteView):
+    queryset = Profile.objects.all()
+    template_name = "accounts/delete_profile.html"
+    
