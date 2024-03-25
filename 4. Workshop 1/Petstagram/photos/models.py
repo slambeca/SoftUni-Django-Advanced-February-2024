@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator
 from django.db import models
@@ -11,6 +12,8 @@ from Petstagram.pets.models import Pet
 #
 #     def compare(self, file_size, max_size):
 #         return max_size < file_size
+
+UserModel = get_user_model()
 
 
 SIZE_5MB = 5 * 1024 * 1024
@@ -56,3 +59,8 @@ class PetPhoto(models.Model):
     # created_at = models.DateTimeField(
     #     auto_now_add=True,
     # )
+
+    user = models.ForeignKey(
+        UserModel,
+        on_delete=models.RESTRICT,
+    )
