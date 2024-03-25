@@ -1,5 +1,5 @@
-from django.shortcuts import render, redirect
 from django.urls import reverse, reverse_lazy
+from django.contrib.auth import mixins as auth_mixins
 
 from Petstagram.pets.forms import PetCreateForm, PetEditForm, PetDeleteForm
 from Petstagram.pets.models import Pet
@@ -22,7 +22,7 @@ from django.views import generic as views
 #     return render(request, "pets/pet-add-page.html", context)
 
 
-class PetCreateView(views.CreateView):
+class PetCreateView(auth_mixins.LoginRequiredMixin, views.CreateView):
     # "model" and "fields" in "CreateView" are only needed to create a form with "modelform_factory"
     # model = Pet
     # fields = ("name", "date_of_birth", "pet_photo")
@@ -35,6 +35,18 @@ class PetCreateView(views.CreateView):
             "pet_slug": self.object.slug,
         })
 
+    def form_valid(self, form):
+        pet = form.save(commit=False)
+        pet.user = self.request.user
+        # pet.save()    This line is not necessary, because it will make 2 request to the database
+        return super().form_valid(form)
+
+    # def get_form(self, form_class=None):
+    #     form = super().get_form(form_class=form_class)
+    #
+    #     form.instance.user = self.request.user
+    #     return form
+
 
 # def details_pet(request, username, pet_slug):
 #     context = {
@@ -44,7 +56,7 @@ class PetCreateView(views.CreateView):
 #     return render(request, "pets/pet-details-page.html", context)
 
 
-class PetDetailView(views.DetailView):
+class PetDetailView(auth_mixins.LoginRequiredMixin, views.DetailView):
     # model = Pet  # or "queryset"
     queryset = ((Pet.objects.all().prefetch_related("petphoto_set")
                 .prefetch_related("petphoto_set__photolike_set"))
@@ -72,7 +84,7 @@ class PetDetailView(views.DetailView):
 #     return render(request, "pets/pet-delete-page.html", context)
 
 
-class PetDeleteView(views.DeleteView):
+class PetDeleteView(auth_mixins.LoginRequiredMixin, views.DeleteView):
     model = Pet
     form_class = PetDeleteForm
 
@@ -124,7 +136,7 @@ class PetDeleteView(views.DeleteView):
 #     return render(request, "pets/pet-edit-page.html", context)
 
 
-class PetEditView(views.UpdateView):
+class PetEditView(auth_mixins.LoginRequiredMixin, views.UpdateView):
     model = Pet  # or "queryset = Pet.objects.all()"
     form_class = PetEditForm
     template_name = "pets/pet-edit-page.html"
@@ -143,3 +155,8 @@ class PetEditView(views.UpdateView):
             "username": self.request.GET.get("username"),
             "pet_slug": self.object.slug,
         })
+
+
+class OwnerRequiredMixin:
+    def dispatch(self, request, *args, **kwargs):
+        pass
