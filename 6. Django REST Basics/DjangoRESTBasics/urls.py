@@ -1,23 +1,32 @@
-"""
-URL configuration for DjangoRESTBasics project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("", include("DjangoRESTBasics.web.urls")),
+    path("apis/", include('DjangoRESTBasics.apis.urls')),
 ]
+
+
+"""
+Resource located at /api/books/
+Difference between SSR and RESTful APIs
+
+# Server-side rendering
+
+C => POST /api/books/create/ (GET /api/books/create/ for HTML of the form)
+R all => GET /api/books/
+R details => GET /api/books/2/
+U => POST /api/books/update/2/ (GET /api/books/update/ for HTML of the form)
+D => POST /api/books/delete/2/ (GET /api/books/delete/ for HTML of the form)
+
+# RESTful API (no need for forms):
+
+C => POST /api/books/
+R all => GET /api/books/
+R details => GET /api/books/2/
+U full => PUT /api/books/
+U partial => PATCH /api/books/2/
+D => DELETE /api/books/2/
+
+"""
